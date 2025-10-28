@@ -39,7 +39,8 @@ export default function WorldMap() {
         <Geographies geography="/world-countries.json">
           {({ geographies }) =>
             geographies.map((geo) => {
-              const isoCode = geo.properties.ISO_A3
+              // Use ISO_A3_EH as fallback for countries with ISO_A3 = "-99" (France, Norway, etc.)
+              const isoCode = geo.properties.ISO_A3 === '-99' ? geo.properties.ISO_A3_EH : geo.properties.ISO_A3
               const countryName = geo.properties.NAME || geo.properties.ADMIN
               const regime = regimeData[isoCode] || 'No Data'
 
