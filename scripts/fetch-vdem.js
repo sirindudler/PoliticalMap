@@ -17,6 +17,33 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
+// Parse a single CSV row respecting double-quoted fields (which may contain commas)
+function parseCSVRow(line) {
+  const fields = [];
+  let i = 0;
+  while (i < line.length) {
+    if (line[i] === '"') {
+      // Quoted field
+      let val = '';
+      i++; // skip opening quote
+      while (i < line.length) {
+        if (line[i] === '"' && line[i + 1] === '"') { val += '"'; i += 2; }
+        else if (line[i] === '"') { i++; break; }
+        else { val += line[i++]; }
+      }
+      fields.push(val);
+      if (line[i] === ',') i++; // skip comma
+    } else {
+      // Unquoted field
+      const end = line.indexOf(',', i);
+      if (end === -1) { fields.push(line.slice(i).trim()); break; }
+      fields.push(line.slice(i, end).trim());
+      i = end + 1;
+    }
+  }
+  return fields;
+}
+
 const VDEM_URL = process.env.VDEM_URL ||
   'https://v-dem.net/media/datasets/V-Dem-CY-FullOthers-v15_csv.zip';
 
@@ -65,8 +92,8 @@ async function main() {
   const csvPath = path.join(tmpDir, files[0]);
   const lines = fs.readFileSync(csvPath, 'utf-8').split('\n');
 
-  // Detect column indices from header (handles quoted and unquoted headers)
-  const header = lines[0].split(',').map(c => c.replace(/"/g, '').trim());
+  // Detect column indices from header
+  const header = parseCSVRow(lines[0]);
   const codeIdx   = header.indexOf('country_text_id');
   const yearIdx   = header.indexOf('year');
   const regimeIdx = header.indexOf('v2x_regime');
@@ -88,13 +115,13 @@ async function main() {
     const line = lines[i];
     if (!line.trim()) continue;
 
-    const parts = line.split(',');
+    const parts = parseCSVRow(line);
     if (parts.length <= regimeIdx) continue;
 
-    const code   = parts[codeIdx].replace(/"/g, '').trim();
-    const year   = parts[yearIdx].replace(/"/g, '').trim();
-    const regime = parts[regimeIdx].replace(/"/g, '').trim();
-    const boix   = boixIdx !== -1 ? parts[boixIdx]?.replace(/"/g, '').trim() : '';
+    const code   = parts[codeIdx] || '';
+    const year   = parts[yearIdx] || '';
+    const regime = parts[regimeIdx] || '';
+    const boix   = boixIdx !== -1 ? (parts[boixIdx] || '') : '';
 
     if (!code || !year) continue;
 
@@ -124,12 +151,23 @@ async function main() {
     }
   }
 
+  // Fill missing current-year entries using the most recent available year in timeseries.
+  // This covers countries where V-Dem/Boix data lags (e.g. surveys not yet completed).
+  let filledFromHistory = 0;
+  for (const [code, years] of Object.entries(timeseries)) {
+    if (!regimeData[code]) {
+      const lastYear = Object.keys(years).sort().pop();
+      regimeData[code] = years[lastYear];
+      filledFromHistory++;
+    }
+  }
+
   const publicDir = path.join(__dirname, '../public');
   fs.writeFileSync(
     path.join(publicDir, 'regime-data.json'),
     JSON.stringify(regimeData, null, 2)
   );
-  console.log(`✓ regime-data.json: ${Object.keys(regimeData).length} countries (${CURRENT_YEAR})`);
+  console.log(`✓ regime-data.json: ${Object.keys(regimeData).length} countries (${CURRENT_YEAR}, ${filledFromHistory} filled from last known year)`);
 
   fs.writeFileSync(
     path.join(publicDir, 'regime-timeseries.json'),
