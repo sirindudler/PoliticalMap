@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps"
+import DataSourcesModal from './DataSourcesModal'
 
 const DATASET_CONFIGS = {
   regime: {
@@ -107,19 +108,28 @@ export default function WorldMap() {
   const [labelPosition, setLabelPosition] = useState({ x: 0, y: 0 })
   const [wikiData, setWikiData] = useState(null)
   const [wikiLoading, setWikiLoading] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
 
   const [mapPosition, setMapPosition] = useState({ coordinates: [0, 20], zoom: 1 })
   const dragDistRef = useRef(0)
 
+  const MIN_ZOOM = 1
+
   const zoomAt = useCallback((factor) => {
     setMapPosition(pos => ({
       ...pos,
-      zoom: Math.min(Math.max(pos.zoom * factor, 1), 12),
+      zoom: Math.min(Math.max(pos.zoom * factor, MIN_ZOOM), 12),
     }))
   }, [])
 
   const handleMoveEnd = useCallback((pos) => {
-    setMapPosition(pos)
+    const zoom = Math.max(pos.zoom, MIN_ZOOM)
+    // At zoom=1 the full world is visible — allow more panning as zoom increases
+    const maxLng = 180 * (1 - 1 / zoom)
+    const maxLat = 80 * (1 - 1 / zoom)
+    const lng = Math.max(-maxLng, Math.min(maxLng, pos.coordinates[0]))
+    const lat = Math.max(-maxLat, Math.min(maxLat, pos.coordinates[1]))
+    setMapPosition({ zoom, coordinates: [lng, lat] })
   }, [])
 
   // Load all three datasets in parallel on mount
@@ -225,9 +235,9 @@ export default function WorldMap() {
 
       <ComposableMap
         width={800}
-        height={600}
+        height={500}
         projection="geoNaturalEarth1"
-        projectionConfig={{ scale: 180 }}
+        projectionConfig={{ scale: 185, center: [0, 10] }}
         onClick={handleMapClick}
         style={{ width: "100%", height: "100%" }}
       >
@@ -340,7 +350,15 @@ export default function WorldMap() {
 
       {/* Dataset Toggle */}
       <div className="fixed top-4 left-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200 z-10">
-        <h3 className="font-bold mb-2 text-xs text-gray-600">VIEW BY:</h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-bold text-xs text-gray-600">VIEW BY:</h3>
+          <button
+            onClick={() => setShowInfo(true)}
+            aria-label="About this data"
+            className="w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-500 text-xs font-bold flex items-center justify-center"
+            title="About this data"
+          >?</button>
+        </div>
         <div className="flex flex-col gap-2">
           {Object.entries(DATASET_CONFIGS).map(([key, cfg]) => (
             <button
@@ -374,6 +392,12 @@ export default function WorldMap() {
           <span className="text-xs text-gray-600">No Data</span>
         </div>
       </div>
+      {showInfo && (
+        <DataSourcesModal
+          activeDataset={currentDataset}
+          onClose={() => setShowInfo(false)}
+        />
+      )}
     </div>
   )
 }

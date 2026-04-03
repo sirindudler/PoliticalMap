@@ -70,11 +70,16 @@ async function main() {
   const codeIdx   = header.indexOf('country_text_id');
   const yearIdx   = header.indexOf('year');
   const regimeIdx = header.indexOf('v2x_regime');
+  const boixIdx   = header.indexOf('e_boix_regime');  // fallback: 0=autocracy, 1=democracy
 
   if (codeIdx === -1 || yearIdx === -1 || regimeIdx === -1) {
     throw new Error(`Could not find required columns. Found: code=${codeIdx}, year=${yearIdx}, regime=${regimeIdx}`);
   }
-  console.log(`Columns: code=${codeIdx}, year=${yearIdx}, regime=${regimeIdx}`);
+  console.log(`Columns: code=${codeIdx}, year=${yearIdx}, regime=${regimeIdx}, boix=${boixIdx}`);
+
+  // Boix fallback: maps 0→Closed Autocracy, 1→Electoral Democracy
+  // Used when v2x_regime is missing (V-Dem expert survey incomplete for that country-year)
+  const BOIX_MAP = { '0': 'Closed Autocracy', '1': 'Electoral Democracy' };
 
   const regimeData = {};       // { ISO: category } for current year
   const timeseries = {};       // { ISO: { year: category } } for 10-year window
@@ -83,17 +88,18 @@ async function main() {
     const line = lines[i];
     if (!line.trim()) continue;
 
-    // Split handling quoted fields (simple split — V-Dem doesn't quote numeric fields)
     const parts = line.split(',');
     if (parts.length <= regimeIdx) continue;
 
     const code   = parts[codeIdx].replace(/"/g, '').trim();
     const year   = parts[yearIdx].replace(/"/g, '').trim();
     const regime = parts[regimeIdx].replace(/"/g, '').trim();
+    const boix   = boixIdx !== -1 ? parts[boixIdx]?.replace(/"/g, '').trim() : '';
 
-    if (!code || !year || regime === '' || regime === 'NA') continue;
+    if (!code || !year) continue;
 
-    const category = REGIME_MAP[regime];
+    // Prefer v2x_regime; fall back to Boix-Miller-Rosato when missing
+    const category = REGIME_MAP[regime] || (BOIX_MAP[boix] ?? null);
     if (!category) continue;
 
     const yr = parseInt(year, 10);

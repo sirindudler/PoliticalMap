@@ -71,6 +71,18 @@
     "2023": "Electoral Democracy",
     "2024": "Liberal Democracy"
   },
+  "JPN": {
+    "2015": "Electoral Democracy",
+    "2016": "Electoral Democracy",
+    "2017": "Electoral Democracy",
+    "2018": "Electoral Democracy",
+    "2019": "Electoral Democracy",
+    "2020": "Electoral Democracy",
+    "2021": "Electoral Democracy",
+    "2022": "Electoral Democracy",
+    "2023": "Electoral Democracy",
+    "2024": "Electoral Democracy"
+  },
   "MMR": {
     "2015": "Electoral Autocracy",
     "2016": "Electoral Autocracy",
@@ -252,6 +264,8 @@
     "2024": "Electoral Democracy"
   },
   "MLI": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
     "2017": "Electoral Democracy",
     "2018": "Electoral Autocracy",
     "2019": "Electoral Autocracy",
@@ -261,8 +275,20 @@
     "2023": "Closed Autocracy",
     "2024": "Closed Autocracy"
   },
+  "PAK": {
+    "2015": "Electoral Democracy",
+    "2016": "Electoral Democracy",
+    "2017": "Electoral Democracy",
+    "2018": "Electoral Democracy",
+    "2019": "Electoral Democracy",
+    "2020": "Electoral Democracy",
+    "2021": "Electoral Democracy",
+    "2022": "Electoral Democracy",
+    "2023": "Electoral Democracy"
+  },
   "PER": {
     "2015": "Electoral Democracy",
+    "2016": "Closed Autocracy",
     "2017": "Electoral Democracy",
     "2018": "Electoral Democracy",
     "2019": "Electoral Democracy",
@@ -321,6 +347,12 @@
     "2024": "Closed Autocracy"
   },
   "AFG": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy",
     "2021": "Electoral Autocracy",
     "2022": "Closed Autocracy",
     "2023": "Closed Autocracy",
@@ -446,6 +478,15 @@
     "2023": "Electoral Autocracy",
     "2024": "Electoral Autocracy"
   },
+  "TZA": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy",
+    "2024": "Electoral Autocracy"
+  },
   "TWN": {
     "2015": "Liberal Democracy",
     "2016": "Liberal Democracy",
@@ -539,6 +580,7 @@
     "2020": "Electoral Autocracy",
     "2021": "Electoral Autocracy",
     "2022": "Electoral Autocracy",
+    "2023": "Closed Autocracy",
     "2024": "Electoral Autocracy"
   },
   "IDN": {
@@ -772,6 +814,7 @@
   "ECU": {
     "2015": "Electoral Democracy",
     "2016": "Electoral Democracy",
+    "2017": "Closed Autocracy",
     "2018": "Electoral Democracy",
     "2019": "Electoral Democracy",
     "2020": "Electoral Democracy",
@@ -940,6 +983,7 @@
     "2017": "Electoral Democracy",
     "2018": "Electoral Democracy",
     "2019": "Electoral Democracy",
+    "2020": "Closed Autocracy",
     "2021": "Electoral Democracy",
     "2022": "Electoral Democracy",
     "2023": "Electoral Democracy",
@@ -1054,9 +1098,24 @@
     "2024": "Electoral Autocracy"
   },
   "TUR": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy",
+    "2021": "Closed Autocracy",
     "2022": "Electoral Autocracy",
     "2023": "Electoral Autocracy",
     "2024": "Electoral Autocracy"
+  },
+  "UKR": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy"
   },
   "GBR": {
     "2015": "Liberal Democracy",
@@ -1081,6 +1140,18 @@
     "2022": "Liberal Democracy",
     "2023": "Liberal Democracy",
     "2024": "Liberal Democracy"
+  },
+  "DZA": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy",
+    "2021": "Closed Autocracy",
+    "2022": "Closed Autocracy",
+    "2023": "Closed Autocracy",
+    "2024": "Closed Autocracy"
   },
   "AGO": {
     "2015": "Electoral Autocracy",
@@ -1154,6 +1225,14 @@
     "2023": "Closed Autocracy",
     "2024": "Electoral Autocracy"
   },
+  "CHN": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy"
+  },
   "COD": {
     "2015": "Electoral Autocracy",
     "2016": "Electoral Autocracy",
@@ -1179,6 +1258,11 @@
     "2024": "Electoral Autocracy"
   },
   "DJI": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
     "2020": "Electoral Autocracy",
     "2021": "Electoral Autocracy",
     "2022": "Electoral Autocracy",
@@ -1305,6 +1389,26 @@
     "2023": "Closed Autocracy",
     "2024": "Closed Autocracy"
   },
+  "LBY": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy"
+  },
+  "MDG": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy",
+    "2021": "Closed Autocracy",
+    "2022": "Closed Autocracy",
+    "2023": "Closed Autocracy",
+    "2024": "Closed Autocracy"
+  },
   "MDA": {
     "2015": "Electoral Democracy",
     "2016": "Electoral Democracy",
@@ -1412,6 +1516,14 @@
     "2022": "Electoral Autocracy",
     "2023": "Electoral Autocracy",
     "2024": "Electoral Autocracy"
+  },
+  "TTO": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy"
   },
   "TKM": {
     "2015": "Closed Autocracy",
@@ -1653,6 +1765,14 @@
     "2023": "Electoral Democracy",
     "2024": "Electoral Democracy"
   },
+  "GUY": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy"
+  },
   "HKG": {
     "2015": "Closed Autocracy",
     "2016": "Closed Autocracy",
@@ -1672,6 +1792,18 @@
     "2022": "Liberal Democracy",
     "2023": "Liberal Democracy",
     "2024": "Liberal Democracy"
+  },
+  "ISR": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy",
+    "2021": "Closed Autocracy",
+    "2022": "Closed Autocracy",
+    "2023": "Closed Autocracy",
+    "2024": "Closed Autocracy"
   },
   "KWT": {
     "2015": "Closed Autocracy",
@@ -1696,6 +1828,30 @@
     "2022": "Electoral Democracy",
     "2023": "Electoral Democracy",
     "2024": "Electoral Democracy"
+  },
+  "LUX": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy",
+    "2021": "Closed Autocracy",
+    "2022": "Closed Autocracy",
+    "2023": "Closed Autocracy",
+    "2024": "Closed Autocracy"
+  },
+  "MKD": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy",
+    "2021": "Closed Autocracy",
+    "2022": "Closed Autocracy",
+    "2023": "Closed Autocracy",
+    "2024": "Closed Autocracy"
   },
   "MYS": {
     "2015": "Electoral Autocracy",
@@ -1890,9 +2046,13 @@
     "2024": "Electoral Democracy"
   },
   "SLB": {
+    "2015": "Closed Autocracy",
     "2016": "Electoral Democracy",
     "2017": "Electoral Democracy",
-    "2018": "Electoral Democracy"
+    "2018": "Electoral Democracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy",
+    "2024": "Electoral Democracy"
   },
   "VUT": {
     "2015": "Electoral Democracy",
@@ -1906,6 +2066,16 @@
     "2023": "Electoral Democracy",
     "2024": "Electoral Democracy"
   },
+  "ARE": {
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy",
+    "2021": "Closed Autocracy",
+    "2022": "Closed Autocracy",
+    "2023": "Closed Autocracy",
+    "2024": "Closed Autocracy"
+  },
   "HUN": {
     "2015": "Electoral Democracy",
     "2016": "Electoral Democracy",
@@ -1917,5 +2087,16 @@
     "2022": "Electoral Autocracy",
     "2023": "Electoral Autocracy",
     "2024": "Electoral Autocracy"
+  },
+  "ZZB": {
+    "2015": "Closed Autocracy",
+    "2016": "Closed Autocracy",
+    "2017": "Closed Autocracy",
+    "2018": "Closed Autocracy",
+    "2019": "Closed Autocracy",
+    "2020": "Closed Autocracy",
+    "2021": "Closed Autocracy",
+    "2022": "Closed Autocracy",
+    "2023": "Closed Autocracy"
   }
 }
