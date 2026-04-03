@@ -147,9 +147,9 @@ export default function WorldMap() {
     }
 
     Promise.all([
-      fetchJson('/regime-data.json', 'regime'),
-      fetchJson('/freedom-house-data.json', 'freedom'),
-      fetchJson('/world-bank-income-data.json', 'income'),
+      fetchJson(`${BASE}/regime-data.json`, 'regime'),
+      fetchJson(`${BASE}/freedom-house-data.json`, 'freedom'),
+      fetchJson(`${BASE}/world-bank-income-data.json`, 'income'),
       fetchJson(`${BASE}/regime-timeseries.json`, 'timeseries'),
     ]).then(results => {
       const newData = { regime: {}, freedom: {}, income: {} }
