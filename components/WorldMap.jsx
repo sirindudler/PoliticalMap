@@ -45,6 +45,8 @@ export default function WorldMap() {
   const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1.2 })
   const [clickedCountry, setClickedCountry] = useState(null)
   const [labelPosition, setLabelPosition] = useState({ x: 0, y: 0 })
+  const [wikiData, setWikiData] = useState(null)
+  const [wikiLoading, setWikiLoading] = useState(false)
 
   useEffect(() => {
     // Load data for current dataset
@@ -100,25 +102,38 @@ export default function WorldMap() {
   }
 
   const handleCountryClick = (geo, event) => {
-    event.stopPropagation() // Prevent map click handler from firing
+    event.stopPropagation()
 
     const isoCode = geo.properties.ISO_A3 === '-99' ? geo.properties.ISO_A3_EH : geo.properties.ISO_A3
     const countryName = geo.properties.NAME || geo.properties.ADMIN
     const category = getCountryCategory(isoCode)
 
-    // If clicking the same country, toggle it off
     if (clickedCountry && clickedCountry.name === countryName) {
       setClickedCountry(null)
-    } else {
-      // Set new country with cursor position
-      setClickedCountry({ name: countryName, category })
-      setLabelPosition({ x: event.clientX, y: event.clientY })
+      setWikiData(null)
+      return
     }
+
+    setClickedCountry({ name: countryName, category })
+    setLabelPosition({ x: event.clientX, y: event.clientY })
+    setWikiData(null)
+    setWikiLoading(true)
+
+    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(countryName)}`)
+      .then(res => res.json())
+      .then(data => {
+        setWikiData({
+          extract: data.extract,
+          thumbnail: data.thumbnail?.source,
+        })
+        setWikiLoading(false)
+      })
+      .catch(() => setWikiLoading(false))
   }
 
   const handleMapClick = () => {
-    // Clear the label when clicking anywhere on the map (not a country)
     setClickedCountry(null)
+    setWikiData(null)
   }
 
   return (
@@ -186,18 +201,52 @@ export default function WorldMap() {
         </div>
       )}
 
-      {/* Click Label at Cursor */}
+      {/* Country Info Card */}
       {clickedCountry && (
         <div
-          className="fixed bg-white px-4 py-2 rounded shadow-lg border border-gray-300 z-50
-                     text-sm font-medium whitespace-nowrap pointer-events-none"
+          className="fixed bg-white rounded-xl shadow-2xl border border-gray-200 z-50 w-72"
           style={{
-            left: `${labelPosition.x + 10}px`,
-            top: `${labelPosition.y + 10}px`
+            left: `${Math.min(labelPosition.x + 16, window.innerWidth - 304)}px`,
+            top: `${Math.min(labelPosition.y + 16, window.innerHeight - 320)}px`,
           }}
         >
-          <div className="font-bold">{clickedCountry.name}</div>
-          <div className="text-gray-600">{clickedCountry.category}</div>
+          {/* Flag */}
+          {wikiData?.thumbnail && (
+            <img
+              src={wikiData.thumbnail}
+              alt={`Flag of ${clickedCountry.name}`}
+              className="w-full h-32 object-cover rounded-t-xl"
+            />
+          )}
+          {wikiLoading && (
+            <div className="w-full h-32 bg-gray-100 rounded-t-xl flex items-center justify-center">
+              <div className="text-gray-400 text-xs">Loading...</div>
+            </div>
+          )}
+
+          <div className="p-4">
+            {/* Close button */}
+            <button
+              className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full w-6 h-6
+                         flex items-center justify-center text-gray-600 hover:text-black
+                         shadow text-xs font-bold"
+              onClick={() => { setClickedCountry(null); setWikiData(null) }}
+            >
+              ✕
+            </button>
+
+            <div className="font-bold text-base mb-1">{clickedCountry.name}</div>
+            <div className="text-xs font-medium text-white rounded px-2 py-0.5 inline-block mb-3"
+              style={{ backgroundColor: config.colors[clickedCountry.category] || '#999' }}>
+              {clickedCountry.category}
+            </div>
+
+            {wikiData?.extract && (
+              <p className="text-xs text-gray-600 leading-relaxed line-clamp-4">
+                {wikiData.extract}
+              </p>
+            )}
+          </div>
         </div>
       )}
 

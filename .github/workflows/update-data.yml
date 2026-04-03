@@ -1,0 +1,58 @@
+name: Update Data Sources
+
+on:
+  # Täglich um 06:00 UTC
+  schedule:
+    - cron: '0 6 * * *'
+  # Manuell triggern (z.B. für V-Dem nach neuem Jahres-Release)
+  workflow_dispatch:
+    inputs:
+      update_vdem:
+        description: 'V-Dem updaten (URL unten anpassen falls neue Version)'
+        type: boolean
+        default: false
+      vdem_url:
+        description: 'V-Dem ZIP URL (leer = default in fetch-vdem.js)'
+        type: string
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update World Bank data
+        run: node scripts/fetch-worldbank.js
+
+      - name: Update V-Dem data
+        if: ${{ github.event.inputs.update_vdem == 'true' }}
+        env:
+          VDEM_URL: ${{ github.event.inputs.vdem_url }}
+        run: node scripts/fetch-vdem.js
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --quiet public/ && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push updated data
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/world-bank-income-data.json public/regime-data.json public/freedom-house-data.json
+          git commit -m "chore: update data sources [$(date +'%Y-%m-%d')]"
+          git push
