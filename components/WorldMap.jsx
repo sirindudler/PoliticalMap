@@ -159,14 +159,14 @@ export default function WorldMap() {
     <div className="relative w-full h-full" onWheel={handleZoom}>
       {/* Error banner */}
       {hasErrors && (
-        <div className="absolute top-0 left-0 right-0 z-20 bg-red-600 text-white text-xs px-4 py-2">
+        <div className="fixed top-0 left-0 right-0 z-20 bg-red-600 text-white text-xs px-4 py-2">
           Failed to load: {Object.keys(loadErrors).join(', ')} — refresh to retry
         </div>
       )}
 
       {/* Loading overlay */}
       {loading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#4A90E2]/80">
+        <div className="fixed inset-0 z-10 flex items-center justify-center bg-[#4A90E2]/80">
           <div className="bg-white rounded-lg px-6 py-4 shadow-lg text-sm font-medium text-gray-700">
             Loading map data...
           </div>
@@ -222,7 +222,7 @@ export default function WorldMap() {
 
       {/* Hover Tooltip */}
       {tooltipContent && !clickedCountry && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2
                         bg-white px-4 py-2 rounded shadow-lg border border-gray-300 z-10
                         text-sm font-medium whitespace-nowrap pointer-events-none">
           {tooltipContent}
@@ -279,7 +279,7 @@ export default function WorldMap() {
       )}
 
       {/* Dataset Toggle */}
-      <div className="absolute top-4 left-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200 z-10">
+      <div className="fixed top-4 left-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200 z-10">
         <h3 className="font-bold mb-2 text-xs text-gray-600">VIEW BY:</h3>
         <div className="flex flex-col gap-2">
           {Object.entries(DATASET_CONFIGS).map(([key, cfg]) => (
@@ -299,7 +299,7 @@ export default function WorldMap() {
       </div>
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-white p-4 rounded-lg shadow-lg border border-gray-200 z-10">
+      <div className="fixed bottom-4 left-4 bg-white p-4 rounded-lg shadow-lg border border-gray-200 z-10">
         <h3 className="font-bold mb-3 text-sm">{config.title}</h3>
         {Object.entries(config.colors)
           .filter(([type]) => type !== 'No Data')
