@@ -263,14 +263,16 @@ export default function WorldMap() {
       {clickedCountry && (
         <div
           className="fixed bg-white rounded-xl shadow-2xl border border-gray-200 z-50 w-72 overflow-y-auto"
-          style={{
-            left: `${Math.min(labelPosition.x + 16, window.innerWidth - 304)}px`,
-            ...(labelPosition.y + 16 + 480 > window.innerHeight
-              ? { bottom: `${Math.max(8, window.innerHeight - labelPosition.y + 8)}px`, top: 'auto' }
-              : { top: `${labelPosition.y + 16}px` }
-            ),
-            maxHeight: `${window.innerHeight - 48}px`,
-          }}
+          style={(() => {
+            const spaceBelow = window.innerHeight - (labelPosition.y + 16) - 8
+            const spaceAbove = labelPosition.y - 16
+            const left = Math.min(labelPosition.x + 16, window.innerWidth - 304)
+            if (spaceBelow >= spaceAbove) {
+              return { left: `${left}px`, top: `${labelPosition.y + 16}px`, maxHeight: `${spaceBelow}px` }
+            } else {
+              return { left: `${left}px`, bottom: `${window.innerHeight - labelPosition.y + 8}px`, top: 'auto', maxHeight: `${spaceAbove}px` }
+            }
+          })()}
         >
           {wikiData?.thumbnail && (
             <img
