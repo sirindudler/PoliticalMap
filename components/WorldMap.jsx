@@ -4,10 +4,12 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps"
 import DataSourcesModal from './DataSourcesModal'
 
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH || ''
+
 const DATASET_CONFIGS = {
   regime: {
     title: 'Political Regime (V-Dem)',
-    file: '/regime-data.json',
+    file: `${BASE}/regime-data.json`,
     colors: {
       'Closed Autocracy': '#8B0000',
       'Electoral Autocracy': '#FF6B6B',
@@ -18,7 +20,7 @@ const DATASET_CONFIGS = {
   },
   freedom: {
     title: 'Freedom Status (Freedom House)',
-    file: '/freedom-house-data.json',
+    file: `${BASE}/freedom-house-data.json`,
     colors: {
       'Free': '#2E7D32',
       'Partly Free': '#FFA726',
@@ -28,7 +30,7 @@ const DATASET_CONFIGS = {
   },
   income: {
     title: 'Income Level (World Bank)',
-    file: '/world-bank-income-data.json',
+    file: `${BASE}/world-bank-income-data.json`,
     colors: {
       'High Income': '#1976D2',
       'Upper Middle Income': '#4CAF50',
@@ -148,7 +150,7 @@ export default function WorldMap() {
       fetchJson('/regime-data.json', 'regime'),
       fetchJson('/freedom-house-data.json', 'freedom'),
       fetchJson('/world-bank-income-data.json', 'income'),
-      fetchJson('/regime-timeseries.json', 'timeseries'),
+      fetchJson(`${BASE}/regime-timeseries.json`, 'timeseries'),
     ]).then(results => {
       const newData = { regime: {}, freedom: {}, income: {} }
       const errors = {}
@@ -247,7 +249,7 @@ export default function WorldMap() {
           center={mapPosition.coordinates}
           onMoveEnd={handleMoveEnd}
         >
-          <Geographies geography="/world-countries.json">
+          <Geographies geography={`${BASE}/world-countries.json`}>
             {({ geographies }) =>
               geographies.map((geo) => {
                 const isoCode = getIsoCode(geo)
