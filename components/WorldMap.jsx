@@ -265,7 +265,10 @@ export default function WorldMap() {
           className="fixed bg-white rounded-xl shadow-2xl border border-gray-200 z-50 w-72 overflow-y-auto"
           style={{
             left: `${Math.min(labelPosition.x + 16, window.innerWidth - 304)}px`,
-            top: `${Math.max(8, Math.min(labelPosition.y + 16, window.innerHeight - 32))}px`,
+            ...(labelPosition.y + 16 + 480 > window.innerHeight
+              ? { bottom: `${Math.max(8, window.innerHeight - labelPosition.y + 8)}px`, top: 'auto' }
+              : { top: `${labelPosition.y + 16}px` }
+            ),
             maxHeight: `${window.innerHeight - 48}px`,
           }}
         >
