@@ -2,6 +2,8 @@
 
 **Explore political regimes, civil freedoms, and income levels across 179 countries — powered by V-Dem, Freedom House, and World Bank data.**
 
+![PoliticalMap screenshot](world_political_map.png)
+
 An interactive world map that makes global political and economic data approachable. Click any country for a Wikipedia summary, a 10-year regime history chart, and classifications across all three datasets at once.
 
 ---
