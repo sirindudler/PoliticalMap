@@ -339,11 +339,11 @@ export default function WorldMap() {
       {/* Zoom Controls */}
       <div className="fixed top-4 right-4 flex flex-col gap-1 z-10">
         <button
-          onClick={() => zoomAt(1.4)}
+          onClick={() => zoomAt(2.0)}
           className="w-9 h-9 bg-white rounded-lg shadow-lg border border-gray-200 text-xl font-light text-gray-700 hover:bg-gray-100 flex items-center justify-center"
         >+</button>
         <button
-          onClick={() => zoomAt(1 / 1.4)}
+          onClick={() => zoomAt(1 / 2.0)}
           className="w-9 h-9 bg-white rounded-lg shadow-lg border border-gray-200 text-xl font-light text-gray-700 hover:bg-gray-100 flex items-center justify-center"
         >−</button>
       </div>
