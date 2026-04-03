@@ -41,6 +41,12 @@ const DATASET_CONFIGS = {
   },
 }
 
+const DATASET_LABELS = {
+  regime: 'Regime',
+  freedom: 'Freedom',
+  income: 'Income',
+}
+
 const REGIME_ORDER = ['Closed Autocracy', 'Electoral Autocracy', 'Electoral Democracy', 'Liberal Democracy']
 const REGIME_COLORS = DATASET_CONFIGS.regime.colors
 
@@ -49,7 +55,7 @@ function RegimeHistory({ isoCode, timeseries }) {
   if (!data) return null
 
   const years = Object.keys(data).sort()
-  const W = 240  // fits inside w-72 popup with p-4 padding
+  const W = 240
   const H = 48
   const barW = Math.floor((W - (years.length - 1) * 2) / years.length)
 
@@ -70,7 +76,6 @@ function RegimeHistory({ isoCode, timeseries }) {
               <rect x={x} y={H - barH} width={barW} height={barH} fill={fill} rx={2}>
                 <title>{yr}: {cat}</title>
               </rect>
-              {/* Year label every other year to avoid crowding */}
               {i % 2 === 0 && (
                 <text x={x + barW / 2} y={H + 11} textAnchor="middle" fontSize={8} fill="#9CA3AF">
                   {yr}
@@ -80,7 +85,6 @@ function RegimeHistory({ isoCode, timeseries }) {
           )
         })}
       </svg>
-      {/* Legend for chart */}
       <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
         {REGIME_ORDER.map(cat => (
           <div key={cat} className="flex items-center gap-1">
@@ -106,11 +110,17 @@ export default function WorldMap() {
   const [loadErrors, setLoadErrors] = useState({})
   const [loading, setLoading] = useState(true)
   const [timeseries, setTimeseries] = useState({})
-  const [clickedCountry, setClickedCountry] = useState(null)  // { name, category, isoCode }
+  const [clickedCountry, setClickedCountry] = useState(null)  // { name, isoCode }
   const [labelPosition, setLabelPosition] = useState({ x: 0, y: 0 })
   const [wikiData, setWikiData] = useState(null)
   const [wikiLoading, setWikiLoading] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const searchRef = useRef(null)
+  const countriesRef = useRef([])
+  const countriesBuilt = useRef(false)
 
   const [mapPosition, setMapPosition] = useState({ coordinates: [0, 20], zoom: 1 })
   const dragDistRef = useRef(0)
@@ -126,7 +136,6 @@ export default function WorldMap() {
 
   const handleMoveEnd = useCallback((pos) => {
     const zoom = Math.max(pos.zoom, MIN_ZOOM)
-    // At zoom=1 the full world is visible — allow more panning as zoom increases
     const maxLng = 180 * (1 - 1 / zoom)
     const maxLat = 80 * (1 - 1 / zoom)
     const lng = Math.max(-maxLng, Math.min(maxLng, pos.coordinates[0]))
@@ -169,6 +178,17 @@ export default function WorldMap() {
     })
   }, [])
 
+  // Close search dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setSearchOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
   const config = DATASET_CONFIGS[currentDataset]
 
   const getCountryColor = (isoCode) => {
@@ -180,25 +200,13 @@ export default function WorldMap() {
     return allData[currentDataset][isoCode] || 'No Data'
   }
 
-  const handleCountryClick = (geo, event) => {
-    event.stopPropagation()
-
-    const isoCode = getIsoCode(geo)
-    const countryName = geo.properties.NAME || geo.properties.ADMIN
-    const category = getCountryCategory(isoCode)
-
-    if (clickedCountry && clickedCountry.name === countryName) {
-      setClickedCountry(null)
-      setWikiData(null)
-      return
-    }
-
-    setClickedCountry({ name: countryName, category, isoCode })
-    setLabelPosition({ x: event.clientX, y: event.clientY })
+  const openCountryPopup = useCallback((name, isoCode, x, y) => {
+    setClickedCountry({ name, isoCode })
+    setLabelPosition({ x, y })
     setWikiData(null)
     setWikiLoading(true)
 
-    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(countryName)}`)
+    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`)
       .then(res => res.json())
       .then(data => {
         setWikiData({
@@ -209,12 +217,39 @@ export default function WorldMap() {
         setWikiLoading(false)
       })
       .catch(() => setWikiLoading(false))
+  }, [])
+
+  const handleCountryClick = (geo, event) => {
+    event.stopPropagation()
+    const isoCode = getIsoCode(geo)
+    const countryName = geo.properties.NAME || geo.properties.ADMIN
+
+    if (clickedCountry && clickedCountry.name === countryName) {
+      setClickedCountry(null)
+      setWikiData(null)
+      return
+    }
+
+    openCountryPopup(countryName, isoCode, event.clientX, event.clientY)
+  }
+
+  const handleSearchSelect = (country) => {
+    setSearchQuery('')
+    setSearchOpen(false)
+    // Open popup centered on screen
+    openCountryPopup(country.name, country.isoCode, window.innerWidth / 2 - 144, window.innerHeight / 2 - 240)
   }
 
   const handleMapClick = () => {
     setClickedCountry(null)
     setWikiData(null)
   }
+
+  const searchResults = searchQuery.length >= 1
+    ? countriesRef.current
+        .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        .slice(0, 8)
+    : []
 
   const hasErrors = Object.keys(loadErrors).length > 0
 
@@ -250,8 +285,19 @@ export default function WorldMap() {
           onMoveEnd={handleMoveEnd}
         >
           <Geographies geography={`${BASE}/world-countries.json`}>
-            {({ geographies }) =>
-              geographies.map((geo) => {
+            {({ geographies }) => {
+              // Build country list once for search
+              if (!countriesBuilt.current && geographies.length > 0) {
+                countriesRef.current = geographies
+                  .map(geo => ({
+                    name: geo.properties.NAME || geo.properties.ADMIN,
+                    isoCode: getIsoCode(geo),
+                  }))
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                countriesBuilt.current = true
+              }
+
+              return geographies.map((geo) => {
                 const isoCode = getIsoCode(geo)
                 const countryName = geo.properties.NAME || geo.properties.ADMIN
                 const category = getCountryCategory(isoCode)
@@ -274,7 +320,7 @@ export default function WorldMap() {
                   />
                 )
               })
-            }
+            }}
           </Geographies>
         </ZoomableGroup>
       </ComposableMap>
@@ -288,19 +334,65 @@ export default function WorldMap() {
         </div>
       )}
 
-      {/* Wikipedia Country Info Popup */}
+      {/* Search */}
+      <div
+        ref={searchRef}
+        className="fixed top-4 left-1/2 -translate-x-1/2 z-20 w-64"
+      >
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">
+            🔍
+          </span>
+          <input
+            type="text"
+            placeholder="Search country..."
+            value={searchQuery}
+            onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true) }}
+            onFocus={() => setSearchOpen(true)}
+            onKeyDown={e => {
+              if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery('') }
+              if (e.key === 'Enter' && searchResults.length > 0) handleSearchSelect(searchResults[0])
+            }}
+            className="w-full pl-8 pr-4 py-2 bg-white rounded-lg shadow-lg border border-gray-200
+                       text-sm text-gray-800 placeholder-gray-400 outline-none
+                       focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+          />
+        </div>
+        {searchOpen && searchResults.length > 0 && (
+          <div className="mt-1 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+            {searchResults.map(country => (
+              <button
+                key={country.isoCode}
+                onClick={() => handleSearchSelect(country)}
+                className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-blue-50
+                           border-b border-gray-50 last:border-0 flex items-center justify-between"
+              >
+                <span>{country.name}</span>
+                <span
+                  className="text-[10px] font-medium text-white rounded px-1.5 py-0.5 ml-2 flex-shrink-0"
+                  style={{ backgroundColor: config.colors[getCountryCategory(country.isoCode)] || '#999' }}
+                >
+                  {getCountryCategory(country.isoCode)}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Country Info Popup */}
       {clickedCountry && (
         <div
           className="fixed bg-white rounded-xl shadow-2xl border border-gray-200 z-50 w-72"
           style={{
             left: `${Math.min(labelPosition.x + 16, window.innerWidth - 304)}px`,
-            top: `${Math.min(Math.max(labelPosition.y + 16, 8), window.innerHeight - 480)}px`,
+            top: `${Math.min(Math.max(labelPosition.y + 16, 8), window.innerHeight - 520)}px`,
           }}
         >
           {wikiData?.thumbnail && (
             <img
               src={wikiData.thumbnail}
-              alt={`${clickedCountry.name}`}
+              alt={clickedCountry.name}
               className="w-full h-32 object-cover rounded-t-xl"
             />
           )}
@@ -320,12 +412,31 @@ export default function WorldMap() {
               ✕
             </button>
 
-            <div className="font-bold text-base mb-1">{clickedCountry.name}</div>
-            <div
-              className="text-xs font-medium text-white rounded px-2 py-0.5 inline-block mb-3"
-              style={{ backgroundColor: config.colors[clickedCountry.category] || '#999' }}
-            >
-              {clickedCountry.category}
+            <div className="font-bold text-base mb-2">{clickedCountry.name}</div>
+
+            {/* All three classifications */}
+            <div className="grid grid-cols-3 gap-1.5 mb-3">
+              {Object.entries(DATASET_CONFIGS).map(([key, cfg]) => {
+                const cat = allData[key][clickedCountry.isoCode] || 'No Data'
+                const color = cfg.colors[cat] || cfg.colors['No Data']
+                return (
+                  <div
+                    key={key}
+                    className={`rounded-lg p-1.5 text-center border-2 ${currentDataset === key ? 'border-gray-400' : 'border-transparent'}`}
+                    style={{ backgroundColor: color + '22' }}
+                  >
+                    <div className="text-[9px] font-semibold text-gray-500 uppercase tracking-wide mb-0.5">
+                      {DATASET_LABELS[key]}
+                    </div>
+                    <div
+                      className="text-[10px] font-bold leading-tight"
+                      style={{ color: color === '#CCCCCC' ? '#999' : color }}
+                    >
+                      {cat}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
 
             {wikiData?.extract && (
@@ -364,7 +475,7 @@ export default function WorldMap() {
 
       {/* Dataset Toggle */}
       <div className="fixed top-4 left-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200 z-10">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between gap-4 mb-2">
           <h3 className="font-bold text-xs text-gray-600">VIEW BY:</h3>
           <button
             onClick={() => setShowInfo(true)}
@@ -414,6 +525,7 @@ export default function WorldMap() {
           <span className="text-xs text-gray-600">No Data</span>
         </div>
       </div>
+
       {showInfo && (
         <DataSourcesModal
           activeDataset={currentDataset}
