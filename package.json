@@ -9,7 +9,8 @@
     "lint": "next lint",
     "update:worldbank": "node scripts/fetch-worldbank.js",
     "update:vdem": "node scripts/fetch-vdem.js",
-    "update:all": "npm run update:worldbank && npm run update:vdem"
+    "update:all": "npm run update:worldbank && npm run update:vdem",
+    "process:timeseries": "node scripts/process-vdem-timeseries.js"
   },
   "dependencies": {
     "next": "^15.0.0",
