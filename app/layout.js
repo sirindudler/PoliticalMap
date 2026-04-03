@@ -1,8 +1,11 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'World Political Map',
-  description: 'Interactive world political map showing all countries',
+  title: 'Political World Map',
+  description: 'Interactive world map showing political regimes, civil freedoms, and income levels across 179 countries.',
+  icons: {
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>",
+  },
 }
 
 export const viewport = {
