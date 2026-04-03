@@ -111,6 +111,7 @@ export default function WorldMap() {
   const [loading, setLoading] = useState(true)
   const [timeseries, setTimeseries] = useState({})
   const [clickedCountry, setClickedCountry] = useState(null)  // { name, isoCode }
+  const [popupDataset, setPopupDataset] = useState('regime')
   const [labelPosition, setLabelPosition] = useState({ x: 0, y: 0 })
   const [wikiData, setWikiData] = useState(null)
   const [wikiLoading, setWikiLoading] = useState(false)
@@ -202,6 +203,7 @@ export default function WorldMap() {
 
   const openCountryPopup = useCallback((name, isoCode, x, y) => {
     setClickedCountry({ name, isoCode })
+    setPopupDataset(currentDataset)
     setLabelPosition({ x, y })
     setWikiData(null)
     setWikiLoading(true)
@@ -414,30 +416,43 @@ export default function WorldMap() {
 
             <div className="font-bold text-base mb-2">{clickedCountry.name}</div>
 
-            {/* All three classifications */}
-            <div className="grid grid-cols-3 gap-1.5 mb-3">
+            {/* Dataset tabs */}
+            <div className="flex gap-1 mb-3">
               {Object.entries(DATASET_CONFIGS).map(([key, cfg]) => {
                 const cat = allData[key][clickedCountry.isoCode] || 'No Data'
                 const color = cfg.colors[cat] || cfg.colors['No Data']
+                const active = popupDataset === key
                 return (
-                  <div
+                  <button
                     key={key}
-                    className={`rounded-lg p-1.5 text-center border-2 ${currentDataset === key ? 'border-gray-400' : 'border-transparent'}`}
-                    style={{ backgroundColor: color + '22' }}
+                    onClick={() => setPopupDataset(key)}
+                    className="flex-1 rounded-lg py-1.5 px-1 text-center transition-all border-2"
+                    style={{
+                      backgroundColor: active ? color + '33' : 'transparent',
+                      borderColor: active ? color : '#e5e7eb',
+                    }}
                   >
-                    <div className="text-[9px] font-semibold text-gray-500 uppercase tracking-wide mb-0.5">
+                    <div className="text-[9px] font-semibold text-gray-500 uppercase tracking-wide">
                       {DATASET_LABELS[key]}
                     </div>
-                    <div
-                      className="text-[10px] font-bold leading-tight"
-                      style={{ color: color === '#CCCCCC' ? '#999' : color }}
-                    >
-                      {cat}
-                    </div>
-                  </div>
+                  </button>
                 )
               })}
             </div>
+
+            {/* Active classification badge */}
+            {(() => {
+              const cat = allData[popupDataset][clickedCountry.isoCode] || 'No Data'
+              const color = DATASET_CONFIGS[popupDataset].colors[cat] || '#CCCCCC'
+              return (
+                <div
+                  className="text-xs font-semibold text-white rounded-lg px-3 py-1.5 mb-3 text-center"
+                  style={{ backgroundColor: color }}
+                >
+                  {cat}
+                </div>
+              )
+            })()}
 
             {wikiData?.extract && (
               <p className="text-xs text-gray-600 leading-relaxed line-clamp-4">
@@ -456,7 +471,9 @@ export default function WorldMap() {
               </a>
             )}
 
-            <RegimeHistory isoCode={clickedCountry.isoCode} timeseries={timeseries} />
+            {popupDataset === 'regime' && (
+              <RegimeHistory isoCode={clickedCountry.isoCode} timeseries={timeseries} />
+            )}
           </div>
         </div>
       )}
