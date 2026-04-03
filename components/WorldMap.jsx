@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps"
+import { ComposableMap, Geographies, Geography } from "react-simple-maps"
 
 const DATASET_CONFIGS = {
   regime: {
@@ -38,6 +38,58 @@ const DATASET_CONFIGS = {
   },
 }
 
+const REGIME_ORDER = ['Closed Autocracy', 'Electoral Autocracy', 'Electoral Democracy', 'Liberal Democracy']
+const REGIME_COLORS = DATASET_CONFIGS.regime.colors
+
+function RegimeHistory({ isoCode, timeseries }) {
+  const data = timeseries[isoCode]
+  if (!data) return null
+
+  const years = Object.keys(data).sort()
+  const W = 240  // fits inside w-72 popup with p-4 padding
+  const H = 48
+  const barW = Math.floor((W - (years.length - 1) * 2) / years.length)
+
+  return (
+    <div className="mt-3 pt-3 border-t border-gray-100">
+      <div className="text-xs font-semibold text-gray-500 mb-2">
+        Regime History ({years[0]}–{years[years.length - 1]})
+      </div>
+      <svg width={W} height={H + 14} className="block overflow-visible">
+        {years.map((yr, i) => {
+          const cat = data[yr]
+          const fill = REGIME_COLORS[cat] || REGIME_COLORS['No Data']
+          const rank = REGIME_ORDER.indexOf(cat)
+          const barH = rank === -1 ? 8 : 12 + rank * 9
+          const x = i * (barW + 2)
+          return (
+            <g key={yr}>
+              <rect x={x} y={H - barH} width={barW} height={barH} fill={fill} rx={2}>
+                <title>{yr}: {cat}</title>
+              </rect>
+              {/* Year label every other year to avoid crowding */}
+              {i % 2 === 0 && (
+                <text x={x + barW / 2} y={H + 11} textAnchor="middle" fontSize={8} fill="#9CA3AF">
+                  {yr}
+                </text>
+              )}
+            </g>
+          )
+        })}
+      </svg>
+      {/* Legend for chart */}
+      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+        {REGIME_ORDER.map(cat => (
+          <div key={cat} className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: REGIME_COLORS[cat] }} />
+            <span className="text-[10px] text-gray-500">{cat.replace('Electoral ', 'El. ')}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function getIsoCode(geo) {
   return geo.properties.ISO_A3 === '-99'
     ? geo.properties.ISO_A3_EH
@@ -50,8 +102,8 @@ export default function WorldMap() {
   const [allData, setAllData] = useState({ regime: {}, freedom: {}, income: {} })
   const [loadErrors, setLoadErrors] = useState({})
   const [loading, setLoading] = useState(true)
-  const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1.2 })
-  const [clickedCountry, setClickedCountry] = useState(null)
+  const [timeseries, setTimeseries] = useState({})
+  const [clickedCountry, setClickedCountry] = useState(null)  // { name, category, isoCode }
   const [labelPosition, setLabelPosition] = useState({ x: 0, y: 0 })
   const [wikiData, setWikiData] = useState(null)
   const [wikiLoading, setWikiLoading] = useState(false)
@@ -72,12 +124,18 @@ export default function WorldMap() {
       fetchJson('/regime-data.json', 'regime'),
       fetchJson('/freedom-house-data.json', 'freedom'),
       fetchJson('/world-bank-income-data.json', 'income'),
+      fetchJson('/regime-timeseries.json', 'timeseries'),
     ]).then(results => {
       const newData = { regime: {}, freedom: {}, income: {} }
       const errors = {}
       for (const result of results) {
-        if (result.error) errors[result.key] = result.error
-        else newData[result.key] = result.data
+        if (result.key === 'timeseries') {
+          if (!result.error) setTimeseries(result.data)
+        } else if (result.error) {
+          errors[result.key] = result.error
+        } else {
+          newData[result.key] = result.data
+        }
       }
       setAllData(newData)
       setLoadErrors(errors)
@@ -96,28 +154,6 @@ export default function WorldMap() {
     return allData[currentDataset][isoCode] || 'No Data'
   }
 
-  const handleZoom = (e) => {
-    e.preventDefault()
-    const delta = e.deltaY * -0.001
-    const newZoom = Math.min(Math.max(position.zoom + delta, 1.2), 8)
-    setPosition(prev => ({ ...prev, zoom: newZoom }))
-  }
-
-  const handleMoveEnd = (newPosition) => {
-    const minZoom = 1.2
-    const zoom = newPosition.zoom
-    if (zoom <= minZoom) {
-      setPosition({ coordinates: [0, 0], zoom })
-      return
-    }
-    const maxLng = (zoom - minZoom) * 100
-    const maxLat = (zoom - minZoom) * 50
-    let [lng, lat] = newPosition.coordinates
-    lng = Math.max(-maxLng, Math.min(maxLng, lng))
-    lat = Math.max(-maxLat, Math.min(maxLat, lat))
-    setPosition({ coordinates: [lng, lat], zoom })
-  }
-
   const handleCountryClick = (geo, event) => {
     event.stopPropagation()
 
@@ -131,7 +167,7 @@ export default function WorldMap() {
       return
     }
 
-    setClickedCountry({ name: countryName, category })
+    setClickedCountry({ name: countryName, category, isoCode })
     setLabelPosition({ x: event.clientX, y: event.clientY })
     setWikiData(null)
     setWikiLoading(true)
@@ -156,7 +192,7 @@ export default function WorldMap() {
   const hasErrors = Object.keys(loadErrors).length > 0
 
   return (
-    <div className="relative w-full h-full" onWheel={handleZoom}>
+    <div className="relative w-full h-full">
       {/* Error banner */}
       {hasErrors && (
         <div className="fixed top-0 left-0 right-0 z-20 bg-red-600 text-white text-xs px-4 py-2">
@@ -181,11 +217,6 @@ export default function WorldMap() {
         onClick={handleMapClick}
         style={{ width: "100%", height: "100%" }}
       >
-        <ZoomableGroup
-          zoom={position.zoom}
-          center={position.coordinates}
-          onMoveEnd={handleMoveEnd}
-        >
           <Geographies geography="/world-countries.json">
             {({ geographies }) =>
               geographies.map((geo) => {
@@ -217,7 +248,6 @@ export default function WorldMap() {
               })
             }
           </Geographies>
-        </ZoomableGroup>
       </ComposableMap>
 
       {/* Hover Tooltip */}
@@ -235,7 +265,7 @@ export default function WorldMap() {
           className="fixed bg-white rounded-xl shadow-2xl border border-gray-200 z-50 w-72"
           style={{
             left: `${Math.min(labelPosition.x + 16, window.innerWidth - 304)}px`,
-            top: `${Math.min(labelPosition.y + 16, window.innerHeight - 320)}px`,
+            top: `${Math.min(labelPosition.y + 16, window.innerHeight - 480)}px`,
           }}
         >
           {wikiData?.thumbnail && (
@@ -274,6 +304,8 @@ export default function WorldMap() {
                 {wikiData.extract}
               </p>
             )}
+
+            <RegimeHistory isoCode={clickedCountry.isoCode} timeseries={timeseries} />
           </div>
         </div>
       )}
