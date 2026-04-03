@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { ComposableMap, Geographies, Geography } from "react-simple-maps"
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps"
 
 const DATASET_CONFIGS = {
   regime: {
@@ -108,6 +108,20 @@ export default function WorldMap() {
   const [wikiData, setWikiData] = useState(null)
   const [wikiLoading, setWikiLoading] = useState(false)
 
+  const [mapPosition, setMapPosition] = useState({ coordinates: [0, 20], zoom: 1 })
+  const dragDistRef = useRef(0)
+
+  const zoomAt = useCallback((factor) => {
+    setMapPosition(pos => ({
+      ...pos,
+      zoom: Math.min(Math.max(pos.zoom * factor, 1), 12),
+    }))
+  }, [])
+
+  const handleMoveEnd = useCallback((pos) => {
+    setMapPosition(pos)
+  }, [])
+
   // Load all three datasets in parallel on mount
   useEffect(() => {
     const fetchJson = async (url, key) => {
@@ -192,7 +206,7 @@ export default function WorldMap() {
   const hasErrors = Object.keys(loadErrors).length > 0
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full overflow-hidden">
       {/* Error banner */}
       {hasErrors && (
         <div className="fixed top-0 left-0 right-0 z-20 bg-red-600 text-white text-xs px-4 py-2">
@@ -217,6 +231,11 @@ export default function WorldMap() {
         onClick={handleMapClick}
         style={{ width: "100%", height: "100%" }}
       >
+        <ZoomableGroup
+          zoom={mapPosition.zoom}
+          center={mapPosition.coordinates}
+          onMoveEnd={handleMoveEnd}
+        >
           <Geographies geography="/world-countries.json">
             {({ geographies }) =>
               geographies.map((geo) => {
@@ -232,12 +251,8 @@ export default function WorldMap() {
                     stroke="#000000"
                     strokeWidth={0.5}
                     onClick={(event) => handleCountryClick(geo, event)}
-                    onMouseEnter={() => {
-                      setTooltipContent(`${countryName} - ${category}`)
-                    }}
-                    onMouseLeave={() => {
-                      setTooltipContent("")
-                    }}
+                    onMouseEnter={() => setTooltipContent(`${countryName} - ${category}`)}
+                    onMouseLeave={() => setTooltipContent("")}
                     style={{
                       default: { outline: 'none' },
                       hover: { fill: '#F0F0F0', outline: 'none', cursor: 'pointer' },
@@ -248,6 +263,7 @@ export default function WorldMap() {
               })
             }
           </Geographies>
+        </ZoomableGroup>
       </ComposableMap>
 
       {/* Hover Tooltip */}
@@ -309,6 +325,18 @@ export default function WorldMap() {
           </div>
         </div>
       )}
+
+      {/* Zoom Controls */}
+      <div className="fixed top-4 right-4 flex flex-col gap-1 z-10">
+        <button
+          onClick={() => zoomAt(1.4)}
+          className="w-9 h-9 bg-white rounded-lg shadow-lg border border-gray-200 text-xl font-light text-gray-700 hover:bg-gray-100 flex items-center justify-center"
+        >+</button>
+        <button
+          onClick={() => zoomAt(1 / 1.4)}
+          className="w-9 h-9 bg-white rounded-lg shadow-lg border border-gray-200 text-xl font-light text-gray-700 hover:bg-gray-100 flex items-center justify-center"
+        >−</button>
+      </div>
 
       {/* Dataset Toggle */}
       <div className="fixed top-4 left-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200 z-10">
