@@ -1,8 +1,14 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'Political World Map',
-  description: 'Interactive world map showing political regimes, civil freedoms, and income levels across 179 countries.',
+  title: 'Political World Map — Regimes, Freedom & Income by Country',
+  description: 'Explore democracy, autocracy, civil freedoms, and income levels for every country in the world. Interactive map powered by V-Dem, Freedom House, and World Bank data. Click any country for details.',
+  keywords: 'political map, democracy map, world map, freedom index, regime map, autocracy, civil liberties, income levels, V-Dem, Freedom House, World Bank',
+  openGraph: {
+    title: 'Political World Map — Regimes, Freedom & Income by Country',
+    description: 'Explore democracy, autocracy, civil freedoms, and income levels for every country in the world.',
+    type: 'website',
+  },
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>",
   },
