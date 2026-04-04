@@ -530,6 +530,9 @@ export default function WorldMap() {
         <a href="https://sirindudler.com" target="_blank" rel="noopener noreferrer" title="Website" className="hover:opacity-70 transition-opacity">
           <svg className="w-4 h-4" fill="none" stroke="#6b7280" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
         </a>
+        <a href="https://ko-fi.com/sirindudler" target="_blank" rel="noopener noreferrer" title="Ko-fi" className="hover:opacity-70 transition-opacity">
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="#FF5E5B"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.960-.049c.136-.007.398-.048.529-.048h1.476c.958 0 2.574-.105 3.810-.984 1.235-.878 1.560-2.180 1.560-3.108 0-.893-.375-1.594-.375-1.594zM19.748 12.460c-.27.697-.816 1.080-1.534 1.110-.718.030-1.353-.232-1.610-.773-.258-.541-.216-1.200.095-1.847.312-.648.862-1.080 1.580-1.110.719-.030 1.354.232 1.611.773.257.540.215 1.200-.142 1.847z"/></svg>
+        </a>
       </div>
 
       {/* Legend */}
